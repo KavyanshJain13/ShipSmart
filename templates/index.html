@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Route Optimizer</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- LANDING PAGE -->
+<div id="landing">
+    <div class="landing-inner">
+        <div class="landing-logo">🚚</div>
+        <h1 class="landing-title">ShipSmart</h1>
+        <p class="landing-sub">Welcome to ShipSmart</p>
+        <p class="landing-desc">An intelligent delivery route optimizer powered by<br>Particle Swarm Optimization &amp; Genetic Algorithm</p>
+        <button class="landing-btn" onclick="enterApp()">🚀 Get Started</button>
+    </div>
+</div>
+
+<!-- MAIN APP (hidden initially) -->
+<div id="app" style="display:none;">
+
+<header>
+    <div class="header-inner">
+        <span class="logo">🚚 Delivery Route Optimizer</span>
+        <span class="subtitle">PSO vs Genetic Algorithm</span>
+    </div>
+</header>
+
+<nav>
+    <button class="tab-btn active" onclick="showTab('home')">🏠 Home</button>
+    <button class="tab-btn" onclick="showTab('pso')">🌀 PSO Solver</button>
+    <button class="tab-btn" onclick="showTab('ga')">🧬 GA Solver</button>
+    <button class="tab-btn" onclick="showTab('compare')">⚡ Compare</button>
+    <button class="tab-btn" onclick="showTab('analysis')">📊 Analysis</button>
+</nav>
+
+<div class="tab-content">
+
+    <!-- HOME TAB -->
+    <div id="tab-home" class="tab active">
+        <div class="home-grid">
+            <div class="card full-width intro-card">
+                <h2>🚚 Delivery Route Optimization</h2>
+                <p>Given a warehouse and multiple customer delivery locations, find the optimal route that minimizes total travel distance — reducing fuel cost and delivery time. This project uses two nature-inspired algorithms: <strong>Particle Swarm Optimization (PSO)</strong> and <strong>Genetic Algorithm (GA)</strong> to solve this problem and compares their performance.</p>
+            </div>
+
+            <div class="card">
+                <h2>🌀 Particle Swarm Optimization</h2>
+                <div class="theory-block">
+                    <div class="theory-icon">🐦</div>
+                    <p><strong>Inspired by:</strong> Flocking behavior of birds and schooling of fish</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">💡</div>
+                    <p><strong>Core Idea:</strong> A swarm of particles (solutions) fly through the search space. Each particle remembers its personal best position and is attracted toward the global best found by the swarm.</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">⚙️</div>
+                    <p><strong>Key Parameters:</strong> Number of particles, iterations, inertia weight, cognitive and social coefficients</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">✅</div>
+                    <p><strong>Strengths:</strong> Fast convergence, simple implementation, good for continuous problems</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">❌</div>
+                    <p><strong>Weaknesses:</strong> Can get stuck in local optima, less effective for discrete problems like routing</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🧬 Genetic Algorithm</h2>
+                <div class="theory-block">
+                    <div class="theory-icon">🦎</div>
+                    <p><strong>Inspired by:</strong> Darwinian evolution and natural selection</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">💡</div>
+                    <p><strong>Core Idea:</strong> A population of candidate solutions evolves over generations. Fitter solutions are selected for crossover and mutation, producing better offspring each generation.</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">⚙️</div>
+                    <p><strong>Key Parameters:</strong> Population size, generations, crossover rate, mutation rate</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">✅</div>
+                    <p><strong>Strengths:</strong> Good at escaping local optima, highly effective for discrete/combinatorial problems</p>
+                </div>
+                <div class="theory-block">
+                    <div class="theory-icon">❌</div>
+                    <p><strong>Weaknesses:</strong> Slower convergence, sensitive to parameter tuning</p>
+                </div>
+            </div>
+
+            <div class="card full-width">
+                <h2>⚡ PSO vs GA — Quick Comparison</h2>
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>🌀 PSO</th>
+                            <th>🧬 Genetic Algorithm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Inspired By</td><td>Bird flocking</td><td>Natural evolution</td></tr>
+                        <tr><td>Population Type</td><td>Particles</td><td>Chromosomes</td></tr>
+                        <tr><td>Key Operation</td><td>Velocity update</td><td>Crossover + Mutation</td></tr>
+                        <tr><td>Convergence Speed</td><td>Fast</td><td>Moderate</td></tr>
+                        <tr><td>Solution Quality</td><td>Good</td><td>Better for routing</td></tr>
+                        <tr><td>Local Optima Risk</td><td>Higher</td><td>Lower</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PSO TAB -->
+    <div id="tab-pso" class="tab">
+        <div class="solver-grid">
+            <div class="left-col">
+                <div class="card">
+                    <h2>🗺️ Drop Delivery Locations</h2>
+                    <p class="hint">Click on the map to add locations. First pin = 🏭 Warehouse</p>
+                    <div id="pso-map" class="map-container"></div>
+                    <div class="btn-row" style="margin-top:12px;">
+                        <button onclick="clearMap('pso')" class="btn-danger">🗑️ Clear</button>
+                        <button onclick="randomLocations('pso')" class="btn-secondary">🎲 Random</button>
+                    </div>
+                    <p id="pso-location-count" class="city-count">Locations added: 0</p>
+                </div>
+                <div class="card">
+                    <h2>⚙️ Settings</h2>
+                    <label>Iterations</label>
+                    <div class="slider-row">
+                        <input type="range" id="pso-iterations" min="50" max="500" value="200" oninput="document.getElementById('pso-iter-val').innerText = this.value">
+                        <span id="pso-iter-val">200</span>
+                    </div>
+                    <label>Particles</label>
+                    <div class="slider-row">
+                        <input type="range" id="pso-population" min="10" max="100" value="30" oninput="document.getElementById('pso-pop-val').innerText = this.value">
+                        <span id="pso-pop-val">30</span>
+                    </div>
+                    <button onclick="runSolver('pso')" class="btn-pso" style="margin-top:16px;width:100%;">🌀 Run PSO</button>
+                </div>
+            </div>
+            <div class="right-col">
+                <div class="card" id="pso-loading" style="display:none;">
+                    <div class="loader"></div>
+                    <p style="text-align:center;color:#888;">Running PSO, please wait...</p>
+                </div>
+                <div class="card" id="pso-result" style="display:none;">
+                    <h2>🌀 PSO Results</h2>
+                    <div id="pso-stats"></div>
+                    <canvas id="pso-route-canvas" width="400" height="260" style="margin-top:14px;background:#0d0d1a;border-radius:10px;border:1px solid #2a2a4a;width:100%;"></canvas>
+                </div>
+                <div class="card" id="pso-chart-box" style="display:none;">
+                    <h2>📈 Convergence Chart</h2>
+                    <canvas id="pso-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GA TAB -->
+    <div id="tab-ga" class="tab">
+        <div class="solver-grid">
+            <div class="left-col">
+                <div class="card">
+                    <h2>🗺️ Drop Delivery Locations</h2>
+                    <p class="hint">Click on the map to add locations. First pin = 🏭 Warehouse</p>
+                    <div id="ga-map" class="map-container"></div>
+                    <div class="btn-row" style="margin-top:12px;">
+                        <button onclick="clearMap('ga')" class="btn-danger">🗑️ Clear</button>
+                        <button onclick="randomLocations('ga')" class="btn-secondary">🎲 Random</button>
+                    </div>
+                    <p id="ga-location-count" class="city-count">Locations added: 0</p>
+                </div>
+                <div class="card">
+                    <h2>⚙️ Settings</h2>
+                    <label>Iterations</label>
+                    <div class="slider-row">
+                        <input type="range" id="ga-iterations" min="50" max="500" value="200" oninput="document.getElementById('ga-iter-val').innerText = this.value">
+                        <span id="ga-iter-val">200</span>
+                    </div>
+                    <label>Population</label>
+                    <div class="slider-row">
+                        <input type="range" id="ga-population" min="10" max="100" value="30" oninput="document.getElementById('ga-pop-val').innerText = this.value">
+                        <span id="ga-pop-val">30</span>
+                    </div>
+                    <button onclick="runSolver('ga')" class="btn-ga" style="margin-top:16px;width:100%;">🧬 Run Genetic Algorithm</button>
+                </div>
+            </div>
+            <div class="right-col">
+                <div class="card" id="ga-loading" style="display:none;">
+                    <div class="loader"></div>
+                    <p style="text-align:center;color:#888;">Running GA, please wait...</p>
+                </div>
+                <div class="card" id="ga-result" style="display:none;">
+                    <h2>🧬 GA Results</h2>
+                    <div id="ga-stats"></div>
+                    <canvas id="ga-route-canvas" width="400" height="260" style="margin-top:14px;background:#0d0d1a;border-radius:10px;border:1px solid #2a2a4a;width:100%;"></canvas>
+                </div>
+                <div class="card" id="ga-chart-box" style="display:none;">
+                    <h2>📈 Convergence Chart</h2>
+                    <canvas id="ga-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMPARE TAB -->
+    <div id="tab-compare" class="tab">
+        <div class="solver-grid">
+            <div class="left-col">
+                <div class="card">
+                    <h2>🗺️ Drop Delivery Locations</h2>
+                    <p class="hint">Click on the map to add locations. First pin = 🏭 Warehouse</p>
+                    <div id="compare-map" class="map-container"></div>
+                    <div class="btn-row" style="margin-top:12px;">
+                        <button onclick="clearMap('compare')" class="btn-danger">🗑️ Clear</button>
+                        <button onclick="randomLocations('compare')" class="btn-secondary">🎲 Random</button>
+                    </div>
+                    <p id="compare-location-count" class="city-count">Locations added: 0</p>
+                </div>
+                <div class="card">
+                    <h2>⚙️ Settings</h2>
+                    <label>Iterations</label>
+                    <div class="slider-row">
+                        <input type="range" id="compare-iterations" min="50" max="500" value="200" oninput="document.getElementById('compare-iter-val').innerText = this.value">
+                        <span id="compare-iter-val">200</span>
+                    </div>
+                    <label>Population / Particles</label>
+                    <div class="slider-row">
+                        <input type="range" id="compare-population" min="10" max="100" value="30" oninput="document.getElementById('compare-pop-val').innerText = this.value">
+                        <span id="compare-pop-val">30</span>
+                    </div>
+                    <button onclick="runCompare()" class="btn-compare" style="margin-top:16px;width:100%;">⚡ Compare Both</button>
+                </div>
+            </div>
+            <div class="right-col">
+                <div class="card" id="compare-loading" style="display:none;">
+                    <div class="loader"></div>
+                    <p style="text-align:center;color:#888;">Running both algorithms, please wait...</p>
+                </div>
+                <div class="card" id="compare-result" style="display:none;">
+                    <h2>🏆 Comparison Summary</h2>
+                    <div id="compare-stats"></div>
+                </div>
+                <div class="card" id="compare-chart-box" style="display:none;">
+                    <h2>📈 Convergence Chart</h2>
+                    <canvas id="compare-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANALYSIS TAB -->
+    <div id="tab-analysis" class="tab">
+        <div class="home-grid">
+            <div class="card full-width">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h2>📊 Session Analysis</h2>
+                    <button onclick="clearAnalysis()" class="btn-danger" style="padding:6px 14px;font-size:0.8rem;">🗑️ Clear History</button>
+                </div>
+                <div class="win-counter" id="win-counter">
+                    <div class="win-box pso-win">
+                        <div class="win-num" id="pso-wins">0</div>
+                        <div class="win-label">🌀 PSO Wins</div>
+                    </div>
+                    <div class="win-box draw-win">
+                        <div class="win-num" id="draw-wins">0</div>
+                        <div class="win-label">🤝 Draws</div>
+                    </div>
+                    <div class="win-box ga-win">
+                        <div class="win-num" id="ga-wins">0</div>
+                        <div class="win-label">🧬 GA Wins</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card full-width">
+                <h2>📋 Run History</h2>
+                <div id="history-empty" style="color:#666;font-size:0.9rem;">No runs yet. Go to PSO, GA or Compare tab to start!</div>
+                <table class="history-table" id="history-table" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Algorithm</th>
+                            <th>Locations</th>
+                            <th>Iterations</th>
+                            <th>Best Distance</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="/static/script.js"></script>
+</div> <!-- end #app -->
+</body>
+</html>
