@@ -150,7 +150,7 @@ where R = 6371 km (Earth's radius)
 
 ## 👨‍💻 Contributors
 
-Kavyansh Jain
-Arnavv Agnihotri
-Aryan Singh
-Roshni Kumari
+1. Kavyansh Jain
+2. Arnavv Agnihotri
+3. Aryan Singh
+4. Roshni Kumari
